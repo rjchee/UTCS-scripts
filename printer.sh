@@ -105,7 +105,7 @@ _printer () {
             COMPREPLY=( $(compgen -W "print queue rm" -- $cur) )
             ;;
         2)
-            COMPREPLY=( $(compgen -W "301 303 Plw301 Plw303" -- $cur) )
+            COMPREPLY=( $(compgen -W "27 301 303 Plw301 Plw303" -- $cur) )
             ;;
         *)
             local oldIFS="$IFS"

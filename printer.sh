@@ -16,24 +16,35 @@ printer () {
             num=${$2:3}
             ;;
         *)
-            >&2 echo "usage: printer [[print] [queue] [rm]] [0-9]+ [filename or job number]"
+            >&2 echo "usage: printer [[print] [queue] [rm]] [0-9]+ [filenames or job number]"
             return 1
             ;;
     esac
     case $1 in
         print)
-            local files=("${@:3}")
+            local args=("${@:3}")
+            declare -a files
             local foundDocx=false
-            for file in "${files[@]}"
+            local numberFlag=false
+            local copies=1
+            for arg in "${args[@]}"
             do
-                if [ ! -f "$file" ]
+                if $numberFlag
                 then
-                    >&2 echo "usage: printer print ([0-9]+) (filename)"
+                    copies=$arg
+                elif [ $arg = "-#" ]
+                then
+                    numberFlag=true
+                elif [ ! -f "$arg" ]
+                then
+                    >&2 echo "usage: printer print ([0-9]+) [-# N] (filenames)"
                     return 1
-                fi
-                if [[ "$file" == *.docx ]]
-                then
-                    foundDocx=true
+                else
+                    if [[ "$arg" == *.docx ]]
+                    then
+                        foundDocx=true
+                    fi
+                    files+=( $arg )
                 fi
             done
             if $foundDocx
@@ -46,7 +57,7 @@ printer () {
             fi
             for file in "${files[@]}"
             do
-                lpr -Plw$num $file
+                lpr -Plw$num -# $copies $file
             done
             ;;
         queue)

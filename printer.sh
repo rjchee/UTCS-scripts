@@ -24,7 +24,6 @@ printer () {
         print)
             local args=("${@:3}")
             declare -a files
-            local foundDocx=false
             local numberFlag=false
             local copies=1
             for arg in "${args[@]}"
@@ -40,21 +39,21 @@ printer () {
                     >&2 echo "usage: printer print ([0-9]+) [-# N] (filenames)"
                     return 1
                 else
-                    if [[ "$arg" == *.docx ]]
+                    if [[ "$arg" != *.pdf ]]
                     then
-                        foundDocx=true
+                        local convertedFile="/tmp/${arg%.*}.pdf"
+                        if unoconv -f pdf -o "$convertedFile" "$arg"
+                        then
+                            files+=( $convertedFile )
+                        else
+                            echo unknown filetype found: please convert it to a pdf first
+                            return 1
+                        fi
+                    else
+                        files+=( $arg )
                     fi
-                    files+=( $arg )
                 fi
             done
-            if $foundDocx
-            then
-                read -p "Are you sure you want to print a docx file (may print out random bytes)? [yN] " yn
-                if [[ $yn != [yY] ]]
-                then
-                    return
-                fi
-            fi
             for file in "${files[@]}"
             do
                 lpr -Plw$num -# $copies $file

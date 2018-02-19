@@ -31,6 +31,7 @@ printer () {
                 if $numberFlag
                 then
                     copies=$arg
+                    numberFlag=false
                 elif [ $arg = "-#" ]
                 then
                     numberFlag=true
@@ -56,7 +57,8 @@ printer () {
             done
             for file in "${files[@]}"
             do
-                lpr -Plw$num -# $copies $file
+                echo lpr -Plw$num -# $copies $file
+                lpr -Plw$num -# $copies $file && echo success
             done
             ;;
         queue)
